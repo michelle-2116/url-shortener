@@ -1,3 +1,4 @@
+#Setup database connection and session management for SQLAlchemy with PostgreSQL.
 import os
 
 from dotenv import load_dotenv

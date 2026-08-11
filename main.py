@@ -17,7 +17,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Create database tables
+#Create database tables
 Base.metadata.create_all(bind=engine)
 
 BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
@@ -32,13 +32,13 @@ def generate_short_code(length=6):
     )
 
 
-# Frontend
+#Frontend
 @app.get("/")
 def home():
     return FileResponse("static/index.html")
 
 
-# Create shortened URL
+#Create shortened URL
 @app.post("/shorten", response_model=URLResponse)
 def shorten_url(
     request: URLRequest,
@@ -51,13 +51,13 @@ def shorten_url(
         .first()
     )
 
-    # Return existing short URL for duplicate URLs
+    #Return existing short URL for duplicate URLs
     if existing_url:
         return {
             "short_url": f"{BASE_URL}/{existing_url.short_code}"
         }
 
-    # Generate a unique short code
+    #Generate a unique short code
     while True:
         short_code = generate_short_code()
 
@@ -70,7 +70,7 @@ def shorten_url(
         if not existing_code:
             break
 
-    # Store the URL in PostgreSQL
+    #Store the URL in PostgreSQL
     new_url = URL(
         original_url=str(request.url),
         short_code=short_code
@@ -84,7 +84,7 @@ def shorten_url(
     }
 
 
-# Redirect short URL to original URL
+#Redirect short URL to original URL
 @app.get("/{short_code}")
 def redirect_to_original(
     short_code: str,
@@ -107,6 +107,7 @@ def redirect_to_original(
         status_code=307
     )
 
+#Lookup original URL by short code
 @app.get("/lookup/{short_code}")
 def lookup_url(
     short_code: str,
