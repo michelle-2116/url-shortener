@@ -3,7 +3,7 @@ import secrets
 import string
 
 from fastapi import Depends, FastAPI, HTTPException
-from fastapi.responses import RedirectResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from sqlalchemy.orm import Session
 
 from database import Base, engine, get_db
@@ -32,13 +32,13 @@ def generate_short_code(length=6):
     )
 
 
+# Frontend
 @app.get("/")
 def home():
-    return {
-        "message": "URL Shortener API is running"
-    }
+    return FileResponse("static/index.html")
 
 
+# Create shortened URL
 @app.post("/shorten", response_model=URLResponse)
 def shorten_url(
     request: URLRequest,
@@ -51,7 +51,7 @@ def shorten_url(
         .first()
     )
 
-    # Return the existing short URL if found
+    # Return existing short URL for duplicate URLs
     if existing_url:
         return {
             "short_url": f"{BASE_URL}/{existing_url.short_code}"
@@ -70,7 +70,7 @@ def shorten_url(
         if not existing_code:
             break
 
-    # Create a new database record
+    # Store the URL in PostgreSQL
     new_url = URL(
         original_url=str(request.url),
         short_code=short_code
@@ -84,27 +84,46 @@ def shorten_url(
     }
 
 
+# Redirect short URL to original URL
 @app.get("/{short_code}")
 def redirect_to_original(
     short_code: str,
     db: Session = Depends(get_db)
 ):
-    # Find the URL using the short code
     url = (
         db.query(URL)
         .filter(URL.short_code == short_code)
         .first()
     )
 
-    # Return 404 if the short code doesn't exist
     if not url:
         raise HTTPException(
             status_code=404,
             detail="Short URL not found"
         )
 
-    # Redirect to the original URL
     return RedirectResponse(
         url=url.original_url,
         status_code=307
     )
+
+@app.get("/lookup/{short_code}")
+def lookup_url(
+    short_code: str,
+    db: Session = Depends(get_db)
+):
+    url = (
+        db.query(URL)
+        .filter(URL.short_code == short_code)
+        .first()
+    )
+
+    if not url:
+        raise HTTPException(
+            status_code=404,
+            detail="Short URL not found"
+        )
+
+    return {
+        "original_url": url.original_url
+    }

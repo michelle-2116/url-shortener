@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>URL Shortener</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f4f7fb;
+            padding: 30px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            background: white;
+            padding: 45px;
+            border-radius: 18px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .section {
+            margin-top: 25px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            flex: 1;
+            padding: 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #4f7cff;
+        }
+
+        button {
+            border: none;
+            border-radius: 8px;
+            padding: 14px 20px;
+            font-size: 15px;
+            cursor: pointer;
+            background: #4f7cff;
+            color: white;
+            white-space: nowrap;
+        }
+
+        button:hover {
+            background: #3d68dc;
+        }
+
+        .result {
+            display: none;
+            margin-top: 18px;
+            padding: 16px;
+            border-radius: 10px;
+            background: #f7f9ff;
+        }
+
+        .result-label {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .result-box {
+            display: flex;
+            gap: 10px;
+        }
+
+        .result-box input {
+            background: white;
+        }
+
+        .copy-button {
+            background: #222;
+        }
+
+        .copy-button:hover {
+            background: #000;
+        }
+
+        .instruction {
+            margin-top: 12px;
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .lookup-result {
+            display: none;
+            margin-top: 18px;
+            padding: 16px;
+            border-radius: 10px;
+            background: #f7f9ff;
+        }
+
+        .original-url {
+            word-break: break-all;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .message {
+            margin-top: 12px;
+            font-size: 14px;
+        }
+
+        .success {
+            color: #16823b;
+        }
+
+        .error {
+            color: #d93025;
+        }
+
+        .divider {
+            height: 1px;
+            background: #eee;
+            margin: 35px 0;
+        }
+
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        @media (max-width: 600px) {
+
+            .container {
+                padding: 30px 20px;
+            }
+
+            .input-container {
+                flex-direction: column;
+            }
+
+            .result-box {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>URL Shortener</h1>
+    </div>
+
+
+    <!-- SHORTEN URL -->
+    <div class="section">
+
+        <div class="section-title">
+            Shorten a URL
+        </div>
+
+        <div class="input-container">
+
+            <input
+                type="url"
+                id="urlInput"
+                placeholder="https://example.com/the-long-url"
+            >
+
+            <button
+                id="shortenButton"
+                onclick="shortenURL()"
+            >
+                Shorten URL
+            </button>
+
+        </div>
+
+        <div id="shortenMessage" class="message"></div>
+
+
+        <div id="result" class="result">
+
+            <div class="result-label">
+                Your shortened URL
+            </div>
+
+            <div class="result-box">
+
+                <input
+                    type="text"
+                    id="shortUrl"
+                    readonly
+                >
+
+                <button
+                    class="copy-button"
+                    onclick="copyURL()"
+                >
+                    Copy
+                </button>
+
+            </div>
+
+            <p class="instruction">
+                ✓ Your URL is ready! You can test it by copying
+                the shortened URL and opening it in your browser.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="divider"></div>
+
+
+    <!-- LOOKUP URL -->
+    <div class="section">
+
+        <div class="section-title">
+            Find Original URL
+        </div>
+
+        <div class="input-container">
+
+            <input
+                type="text"
+                id="shortInput"
+                placeholder="Paste your shortened URL or short code"
+            >
+
+            <button
+                id="lookupButton"
+                onclick="lookupURL()"
+            >
+                Find URL
+            </button>
+
+        </div>
+
+        <div id="lookupMessage" class="message"></div>
+
+
+        <div id="lookupResult" class="lookup-result">
+
+            <div class="result-label">
+                Original URL
+            </div>
+
+            <div
+                id="originalUrl"
+                class="original-url"
+            ></div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+async function shortenURL() {
+
+    const urlInput =
+        document.getElementById("urlInput");
+
+    const button =
+        document.getElementById("shortenButton");
+
+    const message =
+        document.getElementById("shortenMessage");
+
+    const result =
+        document.getElementById("result");
+
+    const url = urlInput.value.trim();
+
+
+    if (!url) {
+        showMessage(
+            message,
+            "Please enter a URL.",
+            "error"
+        );
+        return;
+    }
+
+
+    try {
+        new URL(url);
+    } catch {
+        showMessage(
+            message,
+            "Please enter a valid URL.",
+            "error"
+        );
+        return;
+    }
+
+
+    button.textContent = "Shortening...";
+    button.classList.add("loading");
+
+    message.textContent = "";
+    result.style.display = "none";
+
+
+    try {
+
+        const response = await fetch("/shorten", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                url: url
+            })
+        });
+
+
+        const data = await response.json();
+
+
+        if (!response.ok) {
+            throw new Error(
+                data.detail || "Something went wrong."
+            );
+        }
+
+
+        document.getElementById("shortUrl").value =
+            data.short_url;
+
+        result.style.display = "block";
+
+
+        showMessage(
+            message,
+            "✓ URL shortened successfully!",
+            "success"
+        );
+
+
+    } catch (error) {
+
+        showMessage(
+            message,
+            error.message,
+            "error"
+        );
+
+    } finally {
+
+        button.textContent = "Shorten URL";
+        button.classList.remove("loading");
+
+    }
+}
+
+
+async function copyURL() {
+
+    const shortUrl =
+        document.getElementById("shortUrl").value;
+
+
+    await navigator.clipboard.writeText(shortUrl);
+
+
+    showMessage(
+        document.getElementById("shortenMessage"),
+        "✓ Short URL copied to clipboard!",
+        "success"
+    );
+}
+
+
+async function lookupURL() {
+
+    const input =
+        document.getElementById("shortInput");
+
+    const button =
+        document.getElementById("lookupButton");
+
+    const message =
+        document.getElementById("lookupMessage");
+
+    const result =
+        document.getElementById("lookupResult");
+
+    const value = input.value.trim();
+
+
+    if (!value) {
+
+        showMessage(
+            message,
+            "Please enter a shortened URL or short code.",
+            "error"
+        );
+
+        return;
+    }
+
+
+    button.textContent = "Searching...";
+    button.classList.add("loading");
+
+    message.textContent = "";
+    result.style.display = "none";
+
+
+    try {
+
+        let shortCode = value;
+
+
+        // If user pasted the complete short URL,
+        // extract only the short code.
+        if (value.startsWith("http://") ||
+            value.startsWith("https://")) {
+
+            const url = new URL(value);
+
+            shortCode =
+                url.pathname.substring(1);
+        }
+
+
+        if (!shortCode) {
+            throw new Error("Invalid short URL.");
+        }
+
+
+        const response = await fetch(
+            `/lookup/${encodeURIComponent(shortCode)}`
+        );
+
+
+        const data = await response.json();
+
+
+        if (!response.ok) {
+            throw new Error(
+                data.detail || "Short URL not found."
+            );
+        }
+
+
+        document.getElementById("originalUrl").textContent =
+            data.original_url;
+
+        result.style.display = "block";
+
+
+        showMessage(
+            message,
+            "✓ Original URL found!",
+            "success"
+        );
+
+
+    } catch (error) {
+
+        showMessage(
+            message,
+            error.message,
+            "error"
+        );
+
+    } finally {
+
+        button.textContent = "Find URL";
+        button.classList.remove("loading");
+
+    }
+}
+
+
+function showMessage(element, text, type) {
+
+    element.textContent = text;
+
+    element.className =
+        "message " + type;
+}
+
+</script>
+
+</body>
+</html>
