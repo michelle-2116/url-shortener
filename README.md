@@ -1,3 +1,9 @@
+## Repository
+
+**GitHub:** [https://github.com/michelle-2116/url-shortener](https://github.com/michelle-2116/url-shortener)
+
+This repository contains the complete source code, database configuration, frontend, API implementation, and setup instructions for the assessment.
+
 # URL Shortener API
 
 A simple and user-friendly URL shortener built with **FastAPI** and **PostgreSQL**.
@@ -608,12 +614,3 @@ This provides database-level data integrity in addition to application-level che
 
 SQLAlchemy is used as the ORM to manage PostgreSQL database operations using Python models.
 
----
-
-# Security and Configuration
-
-Database credentials are stored in environment variables rather than directly in the source code.
-
-The actual `.env` file is excluded from Git using `.gitignore`.
-
-A `.env.example` file is provided so that another developer can easily configure their own database connection.
